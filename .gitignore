@@ -1,0 +1,25 @@
+# Ignore all .env files
+.env
+
+# Ignore .env files in any subdirectory, including within packages/
+packages/**/.env
+
+# Ignore node_modules in the root and in any subdirectory (including packages/)
+node_modules/
+
+# Ignore node_modules in any subfolder within packages/
+packages/*/node_modules/
+
+# Ignore TypeScript build output
+dist/
+build/
+
+# Ignore OS-specific files (e.g., macOS)
+.DS_Store
+
+# Ignore log files
+*.log
+
+.turbo/
+
+.idea/
