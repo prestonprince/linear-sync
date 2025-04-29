@@ -1,15 +1,21 @@
-import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
+import { serve } from "@hono/node-server";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
 
-const app = new Hono()
+import { appRouter } from "./routes/_app.js";
+import { logger } from "hono/logger";
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+const app = new Hono().basePath("/api");
+app.use(logger());
 
-serve({
-  fetch: app.fetch,
-  port: 3000
-}, (info) => {
-  console.log(`Server is running on http://localhost:${info.port}`)
-})
+app.route("/", appRouter);
+
+serve(
+  {
+    fetch: app.fetch,
+    port: 3001,
+  },
+  (info) => {
+    console.log(`Server is running on http://localhost:${info.port}`);
+  }
+);
