@@ -7,7 +7,6 @@ import { logger } from "hono/logger";
 
 const app = new Hono().basePath("/api");
 app.use(logger());
-
 app.route("/", appRouter);
 
 serve(

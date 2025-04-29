@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import { auth } from "../lib/auth.js";
 import { codegenRouter } from "./codegenRouter.js";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
 
 const app = new Hono<{
   Variables: {
