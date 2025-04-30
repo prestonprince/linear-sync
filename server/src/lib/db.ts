@@ -10,7 +10,7 @@ const poolConfig: PoolConfig = {
   password: "pass",
 };
 
-const dialect = new PostgresDialect({
+export const dialect = new PostgresDialect({
   pool: new Pool(poolConfig),
 });
 

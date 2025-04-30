@@ -19,9 +19,10 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20.11.17",
     "@types/pg": "^8.11.14",
-    "tsx": "^4.7.1",
-    "typescript": "^5.8.3",
+    "kysely-ctl": "^0.12.2",
     "rollup": "^4.13.0",
-    "rollup-plugin-dts": "^6.1.0"
+    "rollup-plugin-dts": "^6.1.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
   }
 }
