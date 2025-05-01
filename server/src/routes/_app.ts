@@ -1,8 +1,9 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 import { auth } from "../lib/auth.js";
 import { codegenRouter } from "./codegenRouter.js";
-import { cors } from "hono/cors";
+import { issueRouter } from "./issueRouter.js";
 
 const app = new Hono<{
   Variables: {
@@ -39,6 +40,7 @@ export const appRouter = app
   .on(["POST", "GET"], "/auth/*", (c) => {
     return auth.handler(c.req.raw);
   })
+  .route("/issues", issueRouter)
   .route("/hono", codegenRouter);
 
 export type AppRouter = typeof appRouter;

@@ -6,14 +6,17 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "migrate:auth": "npx @better-auth/cli migrate"
+    "migrate:auth": "npx @better-auth/cli migrate",
+    "db:migrate": "npx kysely migrate:latest",
+    "db:rollback": "npx kysely migrate:rollback --all"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.1",
     "better-auth": "^1.2.7",
     "hono": "^4.7.8",
     "kysely": "^0.27.6",
-    "pg": "^8.15.6"
+    "pg": "^8.15.6",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
