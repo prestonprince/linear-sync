@@ -1,6 +1,9 @@
 import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { z } from "zod";
 
 import { auth } from "../lib/auth.js";
+import { IssuePriorityValues, IssueValues } from "../models/issues.js";
 
 type Env = {
   Variables: {
@@ -10,8 +13,16 @@ type Env = {
 }
 
 export const issueRouter = new Hono<Env>()
-  .post('/', async (c) => {
-  })
+  .post('/',
+    zValidator("json", z.object({
+      title: z.string(),
+      description: z.string(),
+      status: z.enum(IssueValues),
+      priority: z.enum(IssuePriorityValues),
+      assigneeId: z.string().optional(),
+    })),
+    async (c) => {
+    })
   .get('/', async (c) => {
   })
   .get('/:id', async (c) => {
