@@ -15,11 +15,14 @@ type Env = {
 export const issueRouter = new Hono<Env>()
   .post('/',
     zValidator("json", z.object({
-      title: z.string(),
-      description: z.string(),
-      status: z.enum(IssueValues),
-      priority: z.enum(IssuePriorityValues),
-      assigneeId: z.string().optional(),
+      issue: z.object({
+        title: z.string(),
+        description: z.string(),
+        status: z.enum(IssueValues),
+        priority: z.enum(IssuePriorityValues),
+        assigneeId: z.string().optional(),
+      }),
+      labels: z.string().array(), // array of label ids
     })),
     async (c) => {
     })
