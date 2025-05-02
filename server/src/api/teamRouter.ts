@@ -15,13 +15,19 @@ export const teamRouter = new Hono<Env>().use("*", authRequired).post(
     }),
   ),
   async (c) => {
-    const userId = c.get("user")?.id;
-    if (!userId) {
+    const user = c.get("user");
+    if (!user) {
       throw new HttpStatusError("User not found", 400);
+    }
+    if (user.teamId) {
+      throw new HttpStatusError(
+        `User already on a team with ID: ${user.teamId}`,
+        422,
+      );
     }
     const team = await Team.create({
       ...c.req.valid("json"),
-      ownerId: userId,
+      ownerId: user.id,
     });
     c.json(team, 201);
   },
