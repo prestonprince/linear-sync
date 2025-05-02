@@ -1,8 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { cors } from "hono/cors";
 
-import { appRouter } from "./routes/_app.js";
+import { appRouter } from "./api/_app.js";
 import { logger } from "hono/logger";
 
 const app = new Hono().basePath("/api");
@@ -16,5 +15,5 @@ serve(
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
-  }
+  },
 );

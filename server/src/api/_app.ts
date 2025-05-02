@@ -4,13 +4,11 @@ import { cors } from "hono/cors";
 import { auth } from "../lib/auth.js";
 import { codegenRouter } from "./codegenRouter.js";
 import { issueRouter } from "./issueRouter.js";
+import { HttpStatusError } from "../lib/error.js";
+import { db } from "../lib/db.js";
+import type { Env } from "./types.js";
 
-const app = new Hono<{
-  Variables: {
-    user: typeof auth.$Infer.Session.user | null;
-    session: typeof auth.$Infer.Session.session | null;
-  };
-}>();
+const app = new Hono<Env>();
 
 app.use(
   "*",
@@ -21,10 +19,18 @@ app.use(
     exposeHeaders: ["Content-Length", "Set-Cookie"],
     maxAge: 600,
     credentials: true,
-  })
+  }),
 );
 
 export const appRouter = app
+  .use("*", async (c, next) => {
+    await next();
+    if (c.error instanceof HttpStatusError) {
+      c.json({ error: c.error.message }, c.error.statusCode);
+    } else {
+      c.json({ error: "Something went wrong" }, 500);
+    }
+  })
   .use("*", async (c, next) => {
     const session = await auth.api.getSession({ headers: c.req.raw.headers });
     if (!session) {
@@ -33,14 +39,23 @@ export const appRouter = app
       return next();
     }
 
-    c.set("user", session.user);
+    const teamUser = await db
+      .selectFrom("teamUser")
+      .select("teamId")
+      .where("userId", "=", session.user.id)
+      .executeTakeFirst();
+
+    c.set("user", {
+      ...session.user,
+      teamId: teamUser ? teamUser.teamId : null,
+    });
     c.set("session", session.session);
     return next();
   })
   .on(["POST", "GET"], "/auth/*", (c) => {
     return auth.handler(c.req.raw);
   })
-  .route("/issues", issueRouter)
+  .route("/issue", issueRouter)
   .route("/hono", codegenRouter);
 
 export type AppRouter = typeof appRouter;
