@@ -5,11 +5,37 @@ import * as kysely from 'kysely';
 import * as better_auth from 'better-auth';
 import { User, Session, Account, Verification } from 'better-auth';
 
+type IssueStatus = "backlog" | "todo" | "in_progress" | "in_review" | "done" | "canceled" | "duplicate";
+type IssuePriority = "no_priority" | "urgent" | "high" | "medium" | "low";
+type Issue = {
+    id: string;
+    title: string;
+    description: string;
+    status: IssueStatus;
+    priority: IssuePriority;
+    teamId: string;
+    assigneeId: string | null;
+};
+
+type Team = {
+    id: string;
+    name: string;
+    ownerId: string;
+};
+type TeamUser = {
+    id: string;
+    userId: string;
+    teamId: string;
+};
+
 type Database = {
     user: User;
     session: Session;
     account: Account;
     verification: Verification;
+    issue: Issue;
+    team: Team;
+    teamUser: TeamUser;
 };
 
 declare const auth: {
@@ -202,19 +228,19 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodObject<{
-                    callbackURL: zod.ZodOptional<zod.ZodString>;
-                    newUserCallbackURL: zod.ZodOptional<zod.ZodString>;
-                    errorCallbackURL: zod.ZodOptional<zod.ZodString>;
-                    provider: zod.ZodEnum<["github", ...("github" | "apple" | "discord" | "facebook" | "google" | "microsoft" | "spotify" | "twitch" | "twitter" | "dropbox" | "linkedin" | "gitlab" | "tiktok" | "reddit" | "roblox" | "vk" | "kick" | "zoom")[]]>;
-                    disableRedirect: zod.ZodOptional<zod.ZodBoolean>;
-                    idToken: zod.ZodOptional<zod.ZodObject<{
-                        token: zod.ZodString;
-                        nonce: zod.ZodOptional<zod.ZodString>;
-                        accessToken: zod.ZodOptional<zod.ZodString>;
-                        refreshToken: zod.ZodOptional<zod.ZodString>;
-                        expiresAt: zod.ZodOptional<zod.ZodNumber>;
-                    }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    callbackURL: better_auth.ZodOptional<better_auth.ZodString>;
+                    newUserCallbackURL: better_auth.ZodOptional<better_auth.ZodString>;
+                    errorCallbackURL: better_auth.ZodOptional<better_auth.ZodString>;
+                    provider: better_auth.ZodEnum<["github", ...("apple" | "discord" | "facebook" | "github" | "google" | "microsoft" | "spotify" | "twitch" | "twitter" | "dropbox" | "linkedin" | "gitlab" | "tiktok" | "reddit" | "roblox" | "vk" | "kick" | "zoom")[]]>;
+                    disableRedirect: better_auth.ZodOptional<better_auth.ZodBoolean>;
+                    idToken: better_auth.ZodOptional<better_auth.ZodObject<{
+                        token: better_auth.ZodString;
+                        nonce: better_auth.ZodOptional<better_auth.ZodString>;
+                        accessToken: better_auth.ZodOptional<better_auth.ZodString>;
+                        refreshToken: better_auth.ZodOptional<better_auth.ZodString>;
+                        expiresAt: better_auth.ZodOptional<better_auth.ZodNumber>;
+                    }, "strip", better_auth.ZodTypeAny, {
                         token: string;
                         refreshToken?: string | undefined;
                         accessToken?: string | undefined;
@@ -227,10 +253,10 @@ declare const auth: {
                         expiresAt?: number | undefined;
                         nonce?: string | undefined;
                     }>>;
-                    scopes: zod.ZodOptional<zod.ZodArray<zod.ZodString, "many">>;
-                    requestSignUp: zod.ZodOptional<zod.ZodBoolean>;
-                    loginHint: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                    scopes: better_auth.ZodOptional<better_auth.ZodArray<better_auth.ZodString, "many">>;
+                    requestSignUp: better_auth.ZodOptional<better_auth.ZodBoolean>;
+                    loginHint: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     provider: "apple" | "discord" | "facebook" | "github" | "google" | "microsoft" | "spotify" | "twitch" | "twitter" | "dropbox" | "linkedin" | "gitlab" | "tiktok" | "reddit" | "roblox" | "vk" | "kick" | "zoom";
                     scopes?: string[] | undefined;
                     loginHint?: string | undefined;
@@ -376,14 +402,14 @@ declare const auth: {
             } : void>;
             options: {
                 method: ("GET" | "POST")[];
-                body: zod.ZodOptional<zod.ZodObject<{
-                    code: zod.ZodOptional<zod.ZodString>;
-                    error: zod.ZodOptional<zod.ZodString>;
-                    device_id: zod.ZodOptional<zod.ZodString>;
-                    error_description: zod.ZodOptional<zod.ZodString>;
-                    state: zod.ZodOptional<zod.ZodString>;
-                    user: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodOptional<better_auth.ZodObject<{
+                    code: better_auth.ZodOptional<better_auth.ZodString>;
+                    error: better_auth.ZodOptional<better_auth.ZodString>;
+                    device_id: better_auth.ZodOptional<better_auth.ZodString>;
+                    error_description: better_auth.ZodOptional<better_auth.ZodString>;
+                    state: better_auth.ZodOptional<better_auth.ZodString>;
+                    user: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     state?: string | undefined;
                     code?: string | undefined;
                     device_id?: string | undefined;
@@ -398,14 +424,14 @@ declare const auth: {
                     user?: string | undefined;
                     error_description?: string | undefined;
                 }>>;
-                query: zod.ZodOptional<zod.ZodObject<{
-                    code: zod.ZodOptional<zod.ZodString>;
-                    error: zod.ZodOptional<zod.ZodString>;
-                    device_id: zod.ZodOptional<zod.ZodString>;
-                    error_description: zod.ZodOptional<zod.ZodString>;
-                    state: zod.ZodOptional<zod.ZodString>;
-                    user: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                query: better_auth.ZodOptional<better_auth.ZodObject<{
+                    code: better_auth.ZodOptional<better_auth.ZodString>;
+                    error: better_auth.ZodOptional<better_auth.ZodString>;
+                    device_id: better_auth.ZodOptional<better_auth.ZodString>;
+                    error_description: better_auth.ZodOptional<better_auth.ZodString>;
+                    state: better_auth.ZodOptional<better_auth.ZodString>;
+                    user: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     state?: string | undefined;
                     code?: string | undefined;
                     device_id?: string | undefined;
@@ -498,10 +524,10 @@ declare const auth: {
             } | null>;
             options: {
                 method: "GET";
-                query: zod.ZodOptional<zod.ZodObject<{
-                    disableCookieCache: zod.ZodOptional<zod.ZodOptional<zod.ZodUnion<[zod.ZodBoolean, zod.ZodEffects<zod.ZodString, boolean, string>]>>>;
-                    disableRefresh: zod.ZodOptional<zod.ZodUnion<[zod.ZodBoolean, zod.ZodEffects<zod.ZodString, boolean, string>]>>;
-                }, "strip", zod.ZodTypeAny, {
+                query: better_auth.ZodOptional<better_auth.ZodObject<{
+                    disableCookieCache: better_auth.ZodOptional<better_auth.ZodOptional<better_auth.ZodUnion<[better_auth.ZodBoolean, better_auth.ZodEffects<better_auth.ZodString, boolean, string>]>>>;
+                    disableRefresh: better_auth.ZodOptional<better_auth.ZodUnion<[better_auth.ZodBoolean, better_auth.ZodEffects<better_auth.ZodString, boolean, string>]>>;
+                }, "strip", better_auth.ZodTypeAny, {
                     disableCookieCache?: boolean | undefined;
                     disableRefresh?: boolean | undefined;
                 }, {
@@ -602,7 +628,7 @@ declare const auth: {
         signUpEmail: {
             <AsResponse extends boolean = false, ReturnHeaders extends boolean = false>(...inputCtx: better_call.HasRequiredKeys<better_call.InputContext<"/sign-up/email", {
                 method: "POST";
-                body: zod.ZodRecord<zod.ZodString, zod.ZodAny>;
+                body: better_auth.ZodRecord<better_auth.ZodString, better_auth.ZodAny>;
                 metadata: {
                     $Infer: {
                         body: {
@@ -754,7 +780,7 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodRecord<zod.ZodString, zod.ZodAny>;
+                body: better_auth.ZodRecord<better_auth.ZodString, better_auth.ZodAny>;
                 metadata: {
                     $Infer: {
                         body: {
@@ -917,12 +943,12 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodObject<{
-                    email: zod.ZodString;
-                    password: zod.ZodString;
-                    callbackURL: zod.ZodOptional<zod.ZodString>;
-                    rememberMe: zod.ZodOptional<zod.ZodDefault<zod.ZodBoolean>>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    email: better_auth.ZodString;
+                    password: better_auth.ZodString;
+                    callbackURL: better_auth.ZodOptional<better_auth.ZodString>;
+                    rememberMe: better_auth.ZodOptional<better_auth.ZodDefault<better_auth.ZodBoolean>>;
+                }, "strip", better_auth.ZodTypeAny, {
                     password: string;
                     email: string;
                     callbackURL?: string | undefined;
@@ -1036,10 +1062,10 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodObject<{
-                    email: zod.ZodString;
-                    redirectTo: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    email: better_auth.ZodString;
+                    redirectTo: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     email: string;
                     redirectTo?: string | undefined;
                 }, {
@@ -1109,17 +1135,17 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                query: zod.ZodOptional<zod.ZodObject<{
-                    token: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                query: better_auth.ZodOptional<better_auth.ZodObject<{
+                    token: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     token?: string | undefined;
                 }, {
                     token?: string | undefined;
                 }>>;
-                body: zod.ZodObject<{
-                    newPassword: zod.ZodString;
-                    token: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    newPassword: better_auth.ZodString;
+                    token: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     newPassword: string;
                     token?: string | undefined;
                 }, {
@@ -1211,10 +1237,10 @@ declare const auth: {
             }>;
             options: {
                 method: "GET";
-                query: zod.ZodObject<{
-                    token: zod.ZodString;
-                    callbackURL: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                query: better_auth.ZodObject<{
+                    token: better_auth.ZodString;
+                    callbackURL: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     token: string;
                     callbackURL?: string | undefined;
                 }, {
@@ -1336,10 +1362,10 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodObject<{
-                    email: zod.ZodString;
-                    callbackURL: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    email: better_auth.ZodString;
+                    callbackURL: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     email: string;
                     callbackURL?: string | undefined;
                 }, {
@@ -1449,10 +1475,10 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodObject<{
-                    newEmail: zod.ZodString;
-                    callbackURL: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    newEmail: better_auth.ZodString;
+                    callbackURL: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     newEmail: string;
                     callbackURL?: string | undefined;
                 }, {
@@ -1569,11 +1595,11 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodObject<{
-                    newPassword: zod.ZodString;
-                    currentPassword: zod.ZodString;
-                    revokeOtherSessions: zod.ZodOptional<zod.ZodBoolean>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    newPassword: better_auth.ZodString;
+                    currentPassword: better_auth.ZodString;
+                    revokeOtherSessions: better_auth.ZodOptional<better_auth.ZodBoolean>;
+                }, "strip", better_auth.ZodTypeAny, {
                     newPassword: string;
                     currentPassword: string;
                     revokeOtherSessions?: boolean | undefined;
@@ -1707,9 +1733,9 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodObject<{
-                    newPassword: zod.ZodString;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    newPassword: better_auth.ZodString;
+                }, "strip", better_auth.ZodTypeAny, {
                     newPassword: string;
                 }, {
                     newPassword: string;
@@ -1748,7 +1774,7 @@ declare const auth: {
         updateUser: {
             <AsResponse extends boolean = false, ReturnHeaders extends boolean = false>(...inputCtx: better_call.HasRequiredKeys<better_call.InputContext<"/update-user", {
                 method: "POST";
-                body: zod.ZodRecord<zod.ZodString, zod.ZodAny>;
+                body: better_auth.ZodRecord<better_auth.ZodString, better_auth.ZodAny>;
                 use: ((inputContext: better_call.MiddlewareInputContext<better_call.MiddlewareOptions>) => Promise<{
                     session: {
                         session: Record<string, any> & {
@@ -1832,7 +1858,7 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodRecord<zod.ZodString, zod.ZodAny>;
+                body: better_auth.ZodRecord<better_auth.ZodString, better_auth.ZodAny>;
                 use: ((inputContext: better_call.MiddlewareInputContext<better_call.MiddlewareOptions>) => Promise<{
                     session: {
                         session: Record<string, any> & {
@@ -1969,11 +1995,11 @@ declare const auth: {
                         };
                     };
                 }>)[];
-                body: zod.ZodObject<{
-                    callbackURL: zod.ZodOptional<zod.ZodString>;
-                    password: zod.ZodOptional<zod.ZodString>;
-                    token: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    callbackURL: better_auth.ZodOptional<better_auth.ZodString>;
+                    password: better_auth.ZodOptional<better_auth.ZodString>;
+                    token: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     password?: string | undefined;
                     token?: string | undefined;
                     callbackURL?: string | undefined;
@@ -2047,9 +2073,9 @@ declare const auth: {
             } : never>;
             options: {
                 method: "GET";
-                query: zod.ZodObject<{
-                    callbackURL: zod.ZodString;
-                }, "strip", zod.ZodTypeAny, {
+                query: better_auth.ZodObject<{
+                    callbackURL: better_auth.ZodString;
+                }, "strip", better_auth.ZodTypeAny, {
                     callbackURL: string;
                 }, {
                     callbackURL: string;
@@ -2209,9 +2235,9 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodObject<{
-                    token: zod.ZodString;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    token: better_auth.ZodString;
+                }, "strip", better_auth.ZodTypeAny, {
                     token: string;
                 }, {
                     token: string;
@@ -2491,11 +2517,11 @@ declare const auth: {
             options: {
                 method: "POST";
                 requireHeaders: true;
-                body: zod.ZodObject<{
-                    callbackURL: zod.ZodOptional<zod.ZodString>;
-                    provider: zod.ZodEnum<["github", ...("github" | "apple" | "discord" | "facebook" | "google" | "microsoft" | "spotify" | "twitch" | "twitter" | "dropbox" | "linkedin" | "gitlab" | "tiktok" | "reddit" | "roblox" | "vk" | "kick" | "zoom")[]]>;
-                    scopes: zod.ZodOptional<zod.ZodArray<zod.ZodString, "many">>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    callbackURL: better_auth.ZodOptional<better_auth.ZodString>;
+                    provider: better_auth.ZodEnum<["github", ...("apple" | "discord" | "facebook" | "github" | "google" | "microsoft" | "spotify" | "twitch" | "twitter" | "dropbox" | "linkedin" | "gitlab" | "tiktok" | "reddit" | "roblox" | "vk" | "kick" | "zoom")[]]>;
+                    scopes: better_auth.ZodOptional<better_auth.ZodArray<better_auth.ZodString, "many">>;
+                }, "strip", better_auth.ZodTypeAny, {
                     provider: "apple" | "discord" | "facebook" | "github" | "google" | "microsoft" | "spotify" | "twitch" | "twitter" | "dropbox" | "linkedin" | "gitlab" | "tiktok" | "reddit" | "roblox" | "vk" | "kick" | "zoom";
                     scopes?: string[] | undefined;
                     callbackURL?: string | undefined;
@@ -2711,10 +2737,10 @@ declare const auth: {
             }>;
             options: {
                 method: "GET";
-                query: zod.ZodObject<{
-                    token: zod.ZodString;
-                    callbackURL: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                query: better_auth.ZodObject<{
+                    token: better_auth.ZodString;
+                    callbackURL: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     token: string;
                     callbackURL?: string | undefined;
                 }, {
@@ -2790,10 +2816,10 @@ declare const auth: {
             }>;
             options: {
                 method: "POST";
-                body: zod.ZodObject<{
-                    providerId: zod.ZodString;
-                    accountId: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    providerId: better_auth.ZodString;
+                    accountId: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     providerId: string;
                     accountId?: string | undefined;
                 }, {
@@ -2881,11 +2907,11 @@ declare const auth: {
             } : better_auth.OAuth2Tokens>;
             options: {
                 method: "POST";
-                body: zod.ZodObject<{
-                    providerId: zod.ZodString;
-                    accountId: zod.ZodOptional<zod.ZodString>;
-                    userId: zod.ZodOptional<zod.ZodString>;
-                }, "strip", zod.ZodTypeAny, {
+                body: better_auth.ZodObject<{
+                    providerId: better_auth.ZodString;
+                    accountId: better_auth.ZodOptional<better_auth.ZodString>;
+                    userId: better_auth.ZodOptional<better_auth.ZodString>;
+                }, "strip", better_auth.ZodTypeAny, {
                     providerId: string;
                     accountId?: string | undefined;
                     userId?: string | undefined;
@@ -2950,12 +2976,30 @@ declare const auth: {
         emailAndPassword: {
             enabled: true;
         };
+        trustedOrigins: string[];
     };
     $context: Promise<better_auth.AuthContext>;
     $Infer: {
         Session: {
-            session: better_auth.PrettifyDeep<better_auth.InferSession<O>>;
-            user: better_auth.PrettifyDeep<better_auth.InferUser<O>>;
+            session: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                expiresAt: Date;
+                token: string;
+                ipAddress?: string | null | undefined | undefined;
+                userAgent?: string | null | undefined | undefined;
+            };
+            user: {
+                id: string;
+                name: string;
+                email: string;
+                emailVerified: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                image?: string | null | undefined | undefined;
+            };
         };
     };
     $ERROR_CODES: {
@@ -2985,12 +3029,16 @@ declare const auth: {
     };
 };
 
-declare const appRouter: hono_hono_base.HonoBase<{
+type Env = {
     Variables: {
-        user: typeof auth.$Infer.Session.user | null;
+        user: (typeof auth.$Infer.Session.user & {
+            teamId: string | null;
+        }) | null;
         session: typeof auth.$Infer.Session.session | null;
     };
-}, ({
+};
+
+declare const appRouter: hono_hono_base.HonoBase<Env, ({
     "*": {};
 } & {
     "/auth/*": {
@@ -3002,6 +3050,112 @@ declare const appRouter: hono_hono_base.HonoBase<{
         };
     };
 }) | hono_types.MergeSchemaPath<{
+    "*": {};
+} & {
+    "/": {
+        $post: {
+            input: {
+                json: {
+                    status: "backlog" | "todo" | "in_progress" | "in_review" | "done" | "canceled" | "duplicate";
+                    title: string;
+                    description: string;
+                    priority: "no_priority" | "urgent" | "high" | "medium" | "low";
+                };
+            };
+            output: {
+                status: IssueStatus;
+                title: string;
+                description: string;
+                priority: IssuePriority;
+                teamId: string;
+                assigneeId: string | null;
+                id: string;
+            };
+            outputFormat: "json";
+            status: 201;
+        };
+    };
+} & {
+    "/": {
+        $get: {
+            input: {};
+            output: {};
+            outputFormat: string;
+            status: hono_utils_http_status.StatusCode;
+        } | {
+            input: {};
+            output: {};
+            outputFormat: string;
+            status: hono_utils_http_status.StatusCode;
+        };
+    };
+} & {
+    "/:id": {
+        $get: {
+            input: {
+                param: {
+                    id: string;
+                };
+            };
+            output: {};
+            outputFormat: string;
+            status: hono_utils_http_status.StatusCode;
+        } | {
+            input: {
+                param: {
+                    id: string;
+                };
+            };
+            output: {};
+            outputFormat: string;
+            status: hono_utils_http_status.StatusCode;
+        };
+    };
+} & {
+    "/:id": {
+        $put: {
+            input: {
+                param: {
+                    id: string;
+                };
+            };
+            output: {};
+            outputFormat: string;
+            status: hono_utils_http_status.StatusCode;
+        } | {
+            input: {
+                param: {
+                    id: string;
+                };
+            };
+            output: {};
+            outputFormat: string;
+            status: hono_utils_http_status.StatusCode;
+        };
+    };
+} & {
+    "/:id": {
+        $delete: {
+            input: {
+                param: {
+                    id: string;
+                };
+            };
+            output: {};
+            outputFormat: string;
+            status: hono_utils_http_status.StatusCode;
+        } | {
+            input: {
+                param: {
+                    id: string;
+                };
+            };
+            output: {};
+            outputFormat: string;
+            status: hono_utils_http_status.StatusCode;
+        };
+    };
+}, "/issue"> | hono_types.MergeSchemaPath<{
     "/": {
         $get: {
             input: {};
