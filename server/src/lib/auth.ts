@@ -5,6 +5,7 @@ export const auth = betterAuth({
   database: {
     db: db,
     type: "postgres",
+    casing: "snake",
   },
   emailAndPassword: {
     enabled: true,

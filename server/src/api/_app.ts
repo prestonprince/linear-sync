@@ -8,6 +8,7 @@ import { HttpStatusError } from "../lib/error.js";
 import { db } from "../lib/db.js";
 import type { Env } from "./types.js";
 import { teamRouter } from "./teamRouter.js";
+import { Team } from "../core/team/index.js";
 
 const app = new Hono<Env>();
 
@@ -53,8 +54,37 @@ export const appRouter = app
     c.set("session", session.session);
     return next();
   })
-  .on(["POST", "GET"], "/auth/*", (c) => {
-    return auth.handler(c.req.raw);
+  .on(["POST", "GET"], "/auth/*", async (c) => {
+    const res = await auth.handler(c.req.raw);
+
+    if (c.req.path === "/api/auth/get-session" && res.ok) {
+      try {
+        const authBody = await res.clone().json();
+        const userTeam = await Team.getById(c.get("user")!.teamId!);
+
+        const modifiedBody = {
+          ...authBody,
+          user: {
+            ...authBody.user,
+            team: userTeam,
+          },
+        };
+
+        const newHeaders = new Headers(res.headers);
+        newHeaders.set("Content-Type", "application/json");
+
+        return new Response(JSON.stringify(modifiedBody), {
+          status: res.status,
+          statusText: res.statusText,
+          headers: newHeaders,
+        });
+      } catch (error) {
+        console.error("Error modifying auth response:", error);
+        return res;
+      }
+    } else {
+      return res;
+    }
   })
   .route("/issue", issueRouter)
   .route("/team", teamRouter)

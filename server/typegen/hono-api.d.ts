@@ -3156,6 +3156,30 @@ declare const appRouter: hono_hono_base.HonoBase<Env, ({
         };
     };
 }, "/issue"> | hono_types.MergeSchemaPath<{
+    "*": {};
+} & {
+    "/": {
+        $post: {
+            input: {
+                json: {
+                    name: string;
+                };
+            };
+            output: {};
+            outputFormat: string;
+            status: hono_utils_http_status.StatusCode;
+        } | {
+            input: {
+                json: {
+                    name: string;
+                };
+            };
+            output: {};
+            outputFormat: string;
+            status: hono_utils_http_status.StatusCode;
+        };
+    };
+}, "/team"> | hono_types.MergeSchemaPath<{
     "/": {
         $get: {
             input: {};
