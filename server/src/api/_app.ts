@@ -7,6 +7,7 @@ import { issueRouter } from "./issueRouter.js";
 import { HttpStatusError } from "../lib/error.js";
 import { db } from "../lib/db.js";
 import type { Env } from "./types.js";
+import { teamRouter } from "./teamRouter.js";
 
 const app = new Hono<Env>();
 
@@ -56,6 +57,7 @@ export const appRouter = app
     return auth.handler(c.req.raw);
   })
   .route("/issue", issueRouter)
+  .route("/team", teamRouter)
   .route("/hono", codegenRouter);
 
 export type AppRouter = typeof appRouter;

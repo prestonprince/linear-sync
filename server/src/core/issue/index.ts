@@ -3,7 +3,8 @@ import { fn } from "../../lib/fn.js";
 import { IssuePriorityValues, IssueStatusValues } from "./model.js";
 import { db } from "../../lib/db.js";
 import { HttpStatusError } from "../../lib/error.js";
-import { v4 } from "uuid";
+import { v4 as uuid } from "uuid";
+import { Team } from "../team/index.js";
 
 export namespace Issue {
   export const create = fn(
@@ -27,10 +28,15 @@ export namespace Issue {
         }
       }
 
+      const team = await Team.getById(teamId);
+      if (!team) {
+        throw new HttpStatusError("Team not found", 422);
+      }
+
       const createdIssue = await db
         .insertInto("issue")
         .values({
-          id: v4(),
+          id: uuid(),
           title,
           description,
           status,
