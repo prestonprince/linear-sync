@@ -60,13 +60,16 @@ export const appRouter = app
     if (c.req.path === "/api/auth/get-session" && res.ok) {
       try {
         const authBody = await res.clone().json();
-        const userTeam = await Team.getById(c.get("user")!.teamId!);
+        if (!authBody) {
+          return res;
+        }
+        const teamId = c.get("user")?.teamId;
 
         const modifiedBody = {
           ...authBody,
           user: {
             ...authBody.user,
-            team: userTeam,
+            team: teamId ? await Team.getById(teamId) : null,
           },
         };
 

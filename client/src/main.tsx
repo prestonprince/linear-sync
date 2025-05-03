@@ -12,9 +12,11 @@ import reportWebVitals from "./reportWebVitals.ts";
 import { Theme } from "@radix-ui/themes";
 
 // Create a new router instance
-const router = createRouter({
+export const router = createRouter({
   routeTree,
-  context: {},
+  context: {
+    user: null,
+  },
   defaultPreload: "intent",
   scrollRestoration: true,
   defaultStructuralSharing: true,
@@ -29,7 +31,7 @@ declare module "@tanstack/react-router" {
 }
 
 function InnerApp() {
-  return <RouterProvider router={router} />;
+  return <RouterProvider router={router} context={{ user: null }} />;
 }
 
 function App() {
@@ -45,7 +47,7 @@ if (rootElement && !rootElement.innerHTML) {
       <Theme appearance="dark">
         <App />
       </Theme>
-    </StrictMode>
+    </StrictMode>,
   );
 }
 

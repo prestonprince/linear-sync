@@ -1,9 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { TextField, Button, Flex } from "@radix-ui/themes";
 import { authClient } from "@/lib/authClient";
 
 export const Route = createFileRoute("/logIn")({
+  beforeLoad: async () => {
+    const { data } = await authClient.getSession();
+    if (data && data.user) {
+      throw redirect({
+        to: "/dashboard",
+      });
+    }
+  },
   component: RouteComponent,
 });
 
