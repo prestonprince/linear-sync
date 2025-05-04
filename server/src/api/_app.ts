@@ -125,7 +125,7 @@ export const appRouter = app
     linearUrl.searchParams.set("response_type", "code");
     linearUrl.searchParams.set(
       "scope",
-      ["read", "write", "issues:create", "comments:create"].join(","),
+      ["read", "write", "issues:create", "comments:create", "admin"].join(","),
     );
     linearUrl.searchParams.set("state", state);
     linearUrl.searchParams.set("prompt", "consent");
