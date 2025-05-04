@@ -28,9 +28,9 @@ export const appRouter = app
   .use("*", async (c, next) => {
     await next();
     if (c.error instanceof HttpStatusError) {
-      c.json({ error: c.error.message }, c.error.statusCode);
+      return c.json({ error: c.error.message }, c.error.statusCode);
     } else {
-      c.json({ error: "Something went wrong" }, 500);
+      return c.json({ error: "Something went wrong" }, 500);
     }
   })
   .use("*", async (c, next) => {

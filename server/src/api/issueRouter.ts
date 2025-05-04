@@ -33,7 +33,15 @@ export const issueRouter = new Hono<Env>()
       return c.json(issue, 201);
     },
   )
-  .get("/", async (c) => {})
+  .get("/", async (c) => {
+    const teamId = c.get("user")?.teamId;
+    if (!teamId) {
+      throw new HttpStatusError("User not on team", 400);
+    }
+
+    const teamIssues = await Issue.byTeam(teamId);
+    return c.json({ issues: teamIssues });
+  })
   .get("/:id", async (c) => {})
   .put("/:id", async (c) => {})
   .delete("/:id", async (c) => {});

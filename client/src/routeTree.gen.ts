@@ -16,6 +16,7 @@ import { Route as LogInImport } from './routes/logIn'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthDashboardImport } from './routes/_auth.dashboard'
+import { Route as AuthCreateTeamImport } from './routes/_auth.createTeam'
 
 // Create/Update Routes
 
@@ -45,6 +46,12 @@ const IndexRoute = IndexImport.update({
 const AuthDashboardRoute = AuthDashboardImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthCreateTeamRoute = AuthCreateTeamImport.update({
+  id: '/createTeam',
+  path: '/createTeam',
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -80,6 +87,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpImport
       parentRoute: typeof rootRoute
     }
+    '/_auth/createTeam': {
+      id: '/_auth/createTeam'
+      path: '/createTeam'
+      fullPath: '/createTeam'
+      preLoaderRoute: typeof AuthCreateTeamImport
+      parentRoute: typeof AuthImport
+    }
     '/_auth/dashboard': {
       id: '/_auth/dashboard'
       path: '/dashboard'
@@ -93,10 +107,12 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface AuthRouteChildren {
+  AuthCreateTeamRoute: typeof AuthCreateTeamRoute
   AuthDashboardRoute: typeof AuthDashboardRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthCreateTeamRoute: AuthCreateTeamRoute,
   AuthDashboardRoute: AuthDashboardRoute,
 }
 
@@ -107,6 +123,7 @@ export interface FileRoutesByFullPath {
   '': typeof AuthRouteWithChildren
   '/logIn': typeof LogInRoute
   '/signUp': typeof SignUpRoute
+  '/createTeam': typeof AuthCreateTeamRoute
   '/dashboard': typeof AuthDashboardRoute
 }
 
@@ -115,6 +132,7 @@ export interface FileRoutesByTo {
   '': typeof AuthRouteWithChildren
   '/logIn': typeof LogInRoute
   '/signUp': typeof SignUpRoute
+  '/createTeam': typeof AuthCreateTeamRoute
   '/dashboard': typeof AuthDashboardRoute
 }
 
@@ -124,15 +142,23 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/logIn': typeof LogInRoute
   '/signUp': typeof SignUpRoute
+  '/_auth/createTeam': typeof AuthCreateTeamRoute
   '/_auth/dashboard': typeof AuthDashboardRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '' | '/logIn' | '/signUp' | '/dashboard'
+  fullPaths: '/' | '' | '/logIn' | '/signUp' | '/createTeam' | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '' | '/logIn' | '/signUp' | '/dashboard'
-  id: '__root__' | '/' | '/_auth' | '/logIn' | '/signUp' | '/_auth/dashboard'
+  to: '/' | '' | '/logIn' | '/signUp' | '/createTeam' | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth'
+    | '/logIn'
+    | '/signUp'
+    | '/_auth/createTeam'
+    | '/_auth/dashboard'
   fileRoutesById: FileRoutesById
 }
 
@@ -172,6 +198,7 @@ export const routeTree = rootRoute
     "/_auth": {
       "filePath": "_auth.tsx",
       "children": [
+        "/_auth/createTeam",
         "/_auth/dashboard"
       ]
     },
@@ -180,6 +207,10 @@ export const routeTree = rootRoute
     },
     "/signUp": {
       "filePath": "signUp.tsx"
+    },
+    "/_auth/createTeam": {
+      "filePath": "_auth.createTeam.tsx",
+      "parent": "/_auth"
     },
     "/_auth/dashboard": {
       "filePath": "_auth.dashboard.tsx",

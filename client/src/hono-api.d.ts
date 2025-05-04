@@ -2972,6 +2972,7 @@ declare const auth: {
         database: {
             db: kysely.Kysely<Database>;
             type: "postgres";
+            casing: "snake";
         };
         emailAndPassword: {
             enabled: true;
@@ -3063,13 +3064,13 @@ declare const appRouter: hono_hono_base.HonoBase<Env, ({
                 };
             };
             output: {
+                id: string;
                 status: IssueStatus;
                 title: string;
                 description: string;
                 priority: IssuePriority;
                 teamId: string;
                 assigneeId: string | null;
-                id: string;
             };
             outputFormat: "json";
             status: 201;
@@ -3079,14 +3080,19 @@ declare const appRouter: hono_hono_base.HonoBase<Env, ({
     "/": {
         $get: {
             input: {};
-            output: {};
-            outputFormat: string;
-            status: hono_utils_http_status.StatusCode;
-        } | {
-            input: {};
-            output: {};
-            outputFormat: string;
-            status: hono_utils_http_status.StatusCode;
+            output: {
+                issues: {
+                    id: string;
+                    status: IssueStatus;
+                    title: string;
+                    description: string;
+                    priority: IssuePriority;
+                    teamId: string;
+                    assigneeId: string | null;
+                }[];
+            };
+            outputFormat: "json";
+            status: hono_utils_http_status.ContentfulStatusCode;
         };
     };
 } & {
@@ -3165,18 +3171,13 @@ declare const appRouter: hono_hono_base.HonoBase<Env, ({
                     name: string;
                 };
             };
-            output: {};
-            outputFormat: string;
-            status: hono_utils_http_status.StatusCode;
-        } | {
-            input: {
-                json: {
-                    name: string;
-                };
+            output: {
+                id: string;
+                name: string;
+                ownerId: string;
             };
-            output: {};
-            outputFormat: string;
-            status: hono_utils_http_status.StatusCode;
+            outputFormat: "json";
+            status: 200;
         };
     };
 }, "/team"> | hono_types.MergeSchemaPath<{

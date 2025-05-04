@@ -1,6 +1,6 @@
 import { authClient } from "@/lib/authClient";
 import type { User } from "@/types/auth.types";
-import { Button } from "@radix-ui/themes";
+import { Button, Container, Flex } from "@radix-ui/themes";
 import {
   createFileRoute,
   redirect,
@@ -36,12 +36,13 @@ function RouteComponent() {
   };
 
   return (
-    <div>
-      <Link to="/dashboard">Dashboard</Link>
-      <Button color="tomato" onClick={handleSignOut}>
-        Sign Out
-      </Button>
+    <Container width="100%">
+      <Flex width="100%" justify="end" align="center">
+        <Button color="tomato" onClick={handleSignOut}>
+          Sign Out
+        </Button>
+      </Flex>
       <Outlet />
-    </div>
+    </Container>
   );
 }

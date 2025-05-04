@@ -29,6 +29,7 @@ export const teamRouter = new Hono<Env>().use("*", authRequired).post(
       ...c.req.valid("json"),
       ownerId: user.id,
     });
-    c.json(team, 201);
+    console.log("CREATED TEAM: ", { team });
+    return c.json(team, 200);
   },
 );

@@ -7,7 +7,6 @@ import { routeTree } from "./routeTree.gen";
 
 import "@radix-ui/themes/styles.css";
 
-import "./styles.css";
 import reportWebVitals from "./reportWebVitals.ts";
 import { Theme } from "@radix-ui/themes";
 
