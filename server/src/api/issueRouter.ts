@@ -7,6 +7,7 @@ import { IssuePriorityValues, IssueStatusValues } from "../core/issue/model.js";
 import { Issue } from "../core/issue/index.js";
 import { authRequired } from "./middleware.js";
 import { HttpStatusError } from "../lib/error.js";
+import { Integration } from "../core/integration/index.js";
 
 export const issueRouter = new Hono<Env>()
   .use("*", authRequired)
@@ -29,6 +30,11 @@ export const issueRouter = new Hono<Env>()
       const issue = await Issue.create({
         ...c.req.valid("json"),
         teamId,
+      });
+      Integration.createIssue({
+        teamId,
+        issue,
+        type: "Linear",
       });
       return c.json(issue, 201);
     },

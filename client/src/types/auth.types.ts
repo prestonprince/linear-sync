@@ -10,6 +10,7 @@ export type User = UserModel & {
     id: string;
     name: string;
     ownerId: string;
+    isLinearConnected: boolean;
   } | null;
 };
 export type Session = SessionModel;

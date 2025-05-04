@@ -11,6 +11,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     )
     .addColumn("linear_access_token", "text")
     .addColumn("linear_oauth_state", "text")
+    .addColumn("linear_team_id", "text")
     .execute();
 
   await db.schema

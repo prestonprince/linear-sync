@@ -14,6 +14,7 @@ import { authRequired } from "./middleware.js";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { v4 } from "uuid";
+import { Linear } from "../lib/linear.js";
 
 const app = new Hono<Env>();
 
@@ -68,15 +69,24 @@ export const appRouter = app
         if (!authBody) {
           return res;
         }
-        const teamId = c.get("user")?.teamId;
-
         const modifiedBody = {
           ...authBody,
           user: {
             ...authBody.user,
-            team: teamId ? await Team.getById(teamId) : null,
+            team: null,
           },
         };
+
+        const teamId = c.get("user")?.teamId;
+        if (teamId) {
+          const fetchedTeamData = await Team.getById(teamId);
+          modifiedBody.user.team = {
+            ...fetchedTeamData,
+            isLinearConnected: !!fetchedTeamData?.linearAccessToken,
+            linearAccessToken: undefined,
+            linearOauthState: undefined,
+          };
+        }
 
         const newHeaders = new Headers(res.headers);
         newHeaders.set("Content-Type", "application/json");
@@ -172,11 +182,15 @@ export const appRouter = app
           throw new HttpStatusError("Something went wrong", 500);
         }
 
-        const data = await response.json();
-        console.log(data);
-        await Team.upsertLinearAccessToken({
+        const { access_token } = await response.json();
+        const linearTeam = await Linear.getTeam(access_token);
+
+        await Team.update({
           teamId,
-          accessToken: data.access_token,
+          update: {
+            linearAccessToken: access_token,
+            linearTeamId: linearTeam.id,
+          },
         });
         return c.json({ message: "Success!" });
       } catch (e: any) {

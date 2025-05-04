@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export type IssueStatus =
   | "backlog"
   | "todo"
@@ -41,3 +43,13 @@ export type Issue = {
   teamId: string;
   assigneeId: string | null;
 };
+
+export const IssueSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  status: z.enum(IssueStatusValues),
+  priority: z.enum(IssuePriorityValues),
+  teamId: z.string(),
+  assigneeId: z.string().nullable().optional(),
+});

@@ -5,7 +5,6 @@ import { Button, Container, Flex } from "@radix-ui/themes";
 import {
   createFileRoute,
   redirect,
-  Link,
   Outlet,
   useRouter,
 } from "@tanstack/react-router";
@@ -29,6 +28,7 @@ export const Route = createFileRoute("/_auth")({
 function RouteComponent() {
   const router = useRouter();
   const navigate = Route.useNavigate();
+  const context = Route.useRouteContext();
 
   const handleSignOut = async () => {
     await authClient.signOut();
@@ -39,13 +39,15 @@ function RouteComponent() {
   return (
     <Container width="100%">
       <Flex width="100%" justify="end" align="center">
-        <Button
-          onClick={() => {
-            connectLinear();
-          }}
-        >
-          Connect Linear
-        </Button>
+        {context.user.team?.isLinearConnected ? null : (
+          <Button
+            onClick={() => {
+              connectLinear();
+            }}
+          >
+            Connect Linear
+          </Button>
+        )}
         <Button color="tomato" onClick={handleSignOut}>
           Sign Out
         </Button>
