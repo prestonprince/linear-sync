@@ -1,4 +1,5 @@
 import { authClient } from "@/lib/authClient";
+import { connectLinear } from "@/lib/linear";
 import type { User } from "@/types/auth.types";
 import { Button, Container, Flex } from "@radix-ui/themes";
 import {
@@ -38,6 +39,13 @@ function RouteComponent() {
   return (
     <Container width="100%">
       <Flex width="100%" justify="end" align="center">
+        <Button
+          onClick={() => {
+            connectLinear();
+          }}
+        >
+          Connect Linear
+        </Button>
         <Button color="tomato" onClick={handleSignOut}>
           Sign Out
         </Button>

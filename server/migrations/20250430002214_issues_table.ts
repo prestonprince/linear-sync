@@ -9,6 +9,8 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn("owner_id", "text", (col) =>
       col.notNull().references("user.id").onDelete("cascade"),
     )
+    .addColumn("linear_access_token", "text")
+    .addColumn("linear_oauth_state", "text")
     .execute();
 
   await db.schema

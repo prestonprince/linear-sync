@@ -5,6 +5,69 @@ import { HttpStatusError } from "../../lib/error.js";
 import { v4 as uuid } from "uuid";
 
 export namespace Team {
+  export const upsertLinearOauthState = fn(
+    z.object({
+      teamId: z.string(),
+      state: z.string(),
+    }),
+    async ({ teamId, state }) => {
+      const team = await db
+        .selectFrom("team")
+        .select("id")
+        .where("id", "=", teamId)
+        .executeTakeFirst();
+      if (!team) {
+        throw new HttpStatusError("Team not found", 422);
+      }
+      const updatedTeam = await db
+        .updateTable("team")
+        .set({
+          linearOauthState: state,
+        })
+        .where("id", "=", teamId)
+        .returning(["id", "linearAccessToken"])
+        .executeTakeFirst();
+
+      if (!updatedTeam) {
+        throw new HttpStatusError("Could not update oauth state");
+      }
+
+      return updatedTeam;
+    },
+  );
+
+  export const upsertLinearAccessToken = fn(
+    z.object({
+      teamId: z.string(),
+      accessToken: z.string(),
+    }),
+    async ({ teamId, accessToken }) => {
+      const team = await db
+        .selectFrom("team")
+        .select("id")
+        .where("id", "=", teamId)
+        .executeTakeFirst();
+      if (!team) {
+        throw new HttpStatusError("Team not found", 422);
+      }
+
+      const updatedTeam = await db
+        .updateTable("team")
+        .set({
+          linearAccessToken: accessToken,
+        })
+        .where("id", "=", teamId)
+        .returning(["id", "linearAccessToken"])
+        .executeTakeFirst();
+
+      if (!updatedTeam) {
+        throw new HttpStatusError("Could not update access token");
+      }
+
+      return updatedTeam;
+    },
+  );
+
   export const addUser = fn(
     z.object({
       teamId: z.string(),
@@ -57,6 +120,7 @@ export namespace Team {
           id: uuid(),
           name,
           ownerId,
+          linearAccessToken: null,
         })
         .returningAll()
         .executeTakeFirst();

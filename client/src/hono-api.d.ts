@@ -21,6 +21,8 @@ type Team = {
     id: string;
     name: string;
     ownerId: string;
+    linearAccessToken: string | null;
+    linearOauthState: string | null;
 };
 type TeamUser = {
     id: string;
@@ -3050,6 +3052,33 @@ declare const appRouter: hono_hono_base.HonoBase<Env, ({
             status: hono_utils_http_status.StatusCode;
         };
     };
+} & {
+    "/oauth/linear": {
+        $get: {
+            input: {};
+            output: {
+                url: string;
+            };
+            outputFormat: "json";
+            status: hono_utils_http_status.ContentfulStatusCode;
+        };
+    };
+} & {
+    "/oauth/linear/callback": {
+        $post: {
+            input: {
+                json: {
+                    code: string;
+                    state: string;
+                };
+            };
+            output: {
+                message: string;
+            };
+            outputFormat: "json";
+            status: hono_utils_http_status.ContentfulStatusCode;
+        };
+    };
 }) | hono_types.MergeSchemaPath<{
     "*": {};
 } & {
@@ -3175,6 +3204,8 @@ declare const appRouter: hono_hono_base.HonoBase<Env, ({
                 id: string;
                 name: string;
                 ownerId: string;
+                linearAccessToken: string | null;
+                linearOauthState: string | null;
             };
             outputFormat: "json";
             status: 200;

@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as SignUpImport } from './routes/signUp'
 import { Route as LogInImport } from './routes/logIn'
+import { Route as CallbackImport } from './routes/callback'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthDashboardImport } from './routes/_auth.dashboard'
@@ -29,6 +30,12 @@ const SignUpRoute = SignUpImport.update({
 const LogInRoute = LogInImport.update({
   id: '/logIn',
   path: '/logIn',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CallbackRoute = CallbackImport.update({
+  id: '/callback',
+  path: '/callback',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -71,6 +78,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof AuthImport
+      parentRoute: typeof rootRoute
+    }
+    '/callback': {
+      id: '/callback'
+      path: '/callback'
+      fullPath: '/callback'
+      preLoaderRoute: typeof CallbackImport
       parentRoute: typeof rootRoute
     }
     '/logIn': {
@@ -121,6 +135,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof AuthRouteWithChildren
+  '/callback': typeof CallbackRoute
   '/logIn': typeof LogInRoute
   '/signUp': typeof SignUpRoute
   '/createTeam': typeof AuthCreateTeamRoute
@@ -130,6 +145,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof AuthRouteWithChildren
+  '/callback': typeof CallbackRoute
   '/logIn': typeof LogInRoute
   '/signUp': typeof SignUpRoute
   '/createTeam': typeof AuthCreateTeamRoute
@@ -140,6 +156,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteWithChildren
+  '/callback': typeof CallbackRoute
   '/logIn': typeof LogInRoute
   '/signUp': typeof SignUpRoute
   '/_auth/createTeam': typeof AuthCreateTeamRoute
@@ -148,13 +165,28 @@ export interface FileRoutesById {
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '' | '/logIn' | '/signUp' | '/createTeam' | '/dashboard'
+  fullPaths:
+    | '/'
+    | ''
+    | '/callback'
+    | '/logIn'
+    | '/signUp'
+    | '/createTeam'
+    | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '' | '/logIn' | '/signUp' | '/createTeam' | '/dashboard'
+  to:
+    | '/'
+    | ''
+    | '/callback'
+    | '/logIn'
+    | '/signUp'
+    | '/createTeam'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_auth'
+    | '/callback'
     | '/logIn'
     | '/signUp'
     | '/_auth/createTeam'
@@ -165,6 +197,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
+  CallbackRoute: typeof CallbackRoute
   LogInRoute: typeof LogInRoute
   SignUpRoute: typeof SignUpRoute
 }
@@ -172,6 +205,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
+  CallbackRoute: CallbackRoute,
   LogInRoute: LogInRoute,
   SignUpRoute: SignUpRoute,
 }
@@ -188,6 +222,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/_auth",
+        "/callback",
         "/logIn",
         "/signUp"
       ]
@@ -201,6 +236,9 @@ export const routeTree = rootRoute
         "/_auth/createTeam",
         "/_auth/dashboard"
       ]
+    },
+    "/callback": {
+      "filePath": "callback.tsx"
     },
     "/logIn": {
       "filePath": "logIn.tsx"
