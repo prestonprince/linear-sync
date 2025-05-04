@@ -24,9 +24,11 @@ function DashboardComponent() {
   const issues = Route.useLoaderData();
   return (
     <Flex direction="column" gap="2">
-      <Container width="100%">
+      <Container width="100%" mt="6">
         <Flex justify="between" align="center">
-          <p>Team: {context.user.team?.name}</p>
+          <Text size="6" weight="bold">
+            Team: {context.user.team?.name}
+          </Text>
           <CreateIssueModal />
         </Flex>
       </Container>
@@ -36,7 +38,16 @@ function DashboardComponent() {
             ? issues.map((issue) => (
                 <Box key={issue.id} maxWidth="75%">
                   <Card>
-                    <Text>{issue.title}</Text>
+                    <Flex direction="column" gap="2">
+                      <Text size="5" weight="medium">
+                        {issue.title}
+                      </Text>
+                      <Text size="4">{issue.description}</Text>
+                      <Flex align="center" gap="3">
+                        <Text size="2">{issue.status}</Text>
+                        <Text size="2">{issue.priority}</Text>
+                      </Flex>
+                    </Flex>
                   </Card>
                 </Box>
               ))
