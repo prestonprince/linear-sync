@@ -31,10 +31,11 @@ export const issueRouter = new Hono<Env>()
         ...c.req.valid("json"),
         teamId,
       });
+      // ideally, this would be processed on a worker queue
       Integration.createIssue({
         teamId,
         issue,
-        type: "Linear",
+        type: "Linear", // create 'type' column on team table
       });
       return c.json(issue, 201);
     },
