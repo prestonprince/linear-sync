@@ -2,7 +2,6 @@ import { LinearClient } from "@linear/sdk";
 import { IssueSchema, type IssuePriority } from "../core/issue/model.js";
 import { fn } from "./fn.js";
 import { z } from "zod";
-import { TeamSchema } from "../core/team/model.js";
 
 export namespace Linear {
   const linearPriorityMap: Record<IssuePriority, 0 | 1 | 2 | 3 | 4> = {
