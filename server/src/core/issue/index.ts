@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { fn } from "../../lib/fn.js";
-import { IssuePriorityValues, IssueStatusValues } from "./model.js";
+import {
+  IssuePriorityValues,
+  IssueSchema,
+  IssueStatusValues,
+} from "./model.js";
 import { db } from "../../lib/db.js";
 import { HttpStatusError } from "../../lib/error.js";
 import { v4 as uuid } from "uuid";
@@ -25,6 +29,32 @@ export namespace Issue {
 
     return teamIssues;
   };
+
+  export const update = fn(
+    z.object({
+      update: z.object({
+        title: z.string().optional(),
+        description: z.string().optional(),
+        status: z.enum(IssueStatusValues).optional(),
+        priority: z.enum(IssuePriorityValues).optional(),
+        assigneeId: z.string().nullable().optional(),
+      }),
+      issueId: z.string(),
+    }),
+    async ({ update, issueId }) => {
+      const updatedIssue = await db
+        .updateTable("issue")
+        .set(update)
+        .where("id", "=", issueId)
+        .returningAll()
+        .executeTakeFirst();
+      if (!updatedIssue) {
+        throw new HttpStatusError("Could not update issue", 422);
+      }
+
+      return updatedIssue;
+    },
+  );
 
   export const create = fn(
     z.object({

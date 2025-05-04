@@ -15,6 +15,7 @@ import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { v4 } from "uuid";
 import { Linear } from "../lib/linear.js";
+import { webhookRouter } from "./webhooks.js";
 
 const app = new Hono<Env>();
 
@@ -184,6 +185,16 @@ export const appRouter = app
 
         const { access_token } = await response.json();
         const linearTeam = await Linear.getTeam(access_token);
+        const webhookSuccess = await Linear.createWebhook({
+          accessToken: access_token,
+          linearTeamId: linearTeam.id,
+        });
+
+        if (webhookSuccess) {
+          console.log("SUCCESFULLY CREATED WEBHOOK");
+        } else {
+          console.log("FAILED TO CREATE WEBHOOK");
+        }
 
         await Team.update({
           teamId,
@@ -200,6 +211,7 @@ export const appRouter = app
   )
   .route("/issue", issueRouter)
   .route("/team", teamRouter)
+  .route("/webhook", webhookRouter)
   .route("/hono", codegenRouter);
 
 export type AppRouter = typeof appRouter;

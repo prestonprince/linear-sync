@@ -11,6 +11,13 @@ export namespace Linear {
     medium: 3,
     low: 4,
   };
+  export const appPriorityMap: Record<0 | 1 | 2 | 3 | 4, IssuePriority> = {
+    0: "no_priority",
+    1: "urgent",
+    2: "high",
+    3: "medium",
+    4: "low",
+  };
 
   const toLinearIssue = fn(
     z.object({
@@ -32,6 +39,22 @@ export namespace Linear {
     const client = new LinearClient({ accessToken });
     const teams = await client.teams();
     return teams.nodes[0];
+  };
+
+  export const createWebhook = async ({
+    accessToken,
+    linearTeamId,
+  }: {
+    accessToken: string;
+    linearTeamId: string;
+  }) => {
+    const client = new LinearClient({ accessToken });
+    const res = await client.createWebhook({
+      url: "https://sacred-sadly-dodo.ngrok-free.app/api/webhook/linear-consumer",
+      teamId: linearTeamId,
+      resourceTypes: ["Issue"],
+    });
+    return res.success;
   };
 
   export const createIssue = fn(
