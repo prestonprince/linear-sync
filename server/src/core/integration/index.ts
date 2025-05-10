@@ -20,7 +20,7 @@ export namespace Integration {
       switch (type) {
         case "Linear": {
           if (!team.linearAccessToken || !team.linearTeamId) {
-            throw new Error("Team not connected to linear");
+            return;
           }
           const success = await Linear.createIssue({
             issue,

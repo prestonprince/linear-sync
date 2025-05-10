@@ -56,6 +56,20 @@ export namespace Issue {
     },
   );
 
+  export const byId = async (issueId: string) => {
+    const issue = await db
+      .selectFrom("issue")
+      .selectAll()
+      .where("id", "=", issueId)
+      .executeTakeFirst();
+
+    if (!issue) {
+      return null;
+    }
+
+    return issue;
+  };
+
   export const create = fn(
     z.object({
       title: z.string(),

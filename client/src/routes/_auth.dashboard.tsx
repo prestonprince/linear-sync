@@ -47,6 +47,9 @@ function DashboardComponent() {
                         <Text size="2">{issue.status}</Text>
                         <Text size="2">{issue.priority}</Text>
                       </Flex>
+                      <Text size="1" color="gray" mt="2">
+                        ID: {issue.id}
+                      </Text>
                     </Flex>
                   </Card>
                 </Box>
