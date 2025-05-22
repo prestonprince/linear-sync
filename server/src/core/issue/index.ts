@@ -2,7 +2,6 @@ import { z } from "zod";
 import { fn } from "../../lib/fn.js";
 import {
   IssuePriorityValues,
-  IssueSchema,
   IssueStatusValues,
 } from "./model.js";
 import { db } from "../../lib/db.js";
